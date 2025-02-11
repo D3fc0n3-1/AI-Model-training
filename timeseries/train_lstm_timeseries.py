@@ -93,7 +93,7 @@ def main():
 
 
     # 3. Initialize Model, Loss, Optimizer
-    input_size = args.sequence_length # Sequence length is input dimension
+    input_size = 1 # Number of features is 1 (just 'close' price) # Corrected input_size
     output_size = 1 # Predicting one value (next day's closing price)
     model = StockPriceLSTM(input_size, args.hidden_size, args.num_layers, output_size).to('cuda' if torch.cuda.is_available() else 'cpu') # Move model to GPU if available
     loss_function = nn.MSELoss() # Mean Squared Error loss for regression
@@ -116,7 +116,10 @@ def main():
             total_loss += loss.item()
 
         avg_loss = total_loss / len(train_loader)
-        print(f"Epoch [{epoch+1}/{args.num_epochs}], Training Loss: {avg_loss:.4f}")
+        # Calculate percentage completion
+        percentage_complete = ((epoch + 1) / args.num_epochs) * 100
+
+        print(f"Epoch [{epoch+1}/{args.num_epochs}], {percentage_complete:.2f}% Complete, Training Loss: {avg_loss:.4f}") # Added percentage
 
         # Validation after each epoch
         model.eval() # Set model to evaluation mode
@@ -132,7 +135,7 @@ def main():
                 all_val_labels.extend(batch_labels_val.cpu().numpy())
 
         avg_val_loss = val_loss / len(validation_loader)
-        print(f"Epoch [{epoch+1}/{args.num_epochs}], Validation Loss: {avg_val_loss:.4f}")
+        print(f"Epoch [{epoch+1}/{args.num_epochs}], {percentage_complete:.2f}% Complete, Validation Loss: {avg_val_loss:.4f}") # Added percentage
         model.train() # Set back to training mode after validation
 
 
@@ -177,3 +180,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
